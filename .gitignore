@@ -1,0 +1,9 @@
+# Ignore the Terraform tool folder
+.terraform/
+
+# Ignore local state files (since we use Azure for this now)
+*.tfstate
+*.tfstate.*
+
+# Ignore sensitive variables
+*.tfvars
