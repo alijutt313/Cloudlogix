@@ -23,7 +23,6 @@ resource "random_string" "acr_name" {
 
 provider "azurerm" {
   features {}
-  resource_provider_registrations = "none"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -108,8 +107,9 @@ resource "azurerm_linux_web_app" "web_app" {
   }
 
   app_settings = {
-    DOCKER_REGISTRY_SERVER_URL      = "https://registryfvq3o.azurecr.io"
-    DOCKER_REGISTRY_SERVER_USERNAME = azurerm_container_registry.acr.admin_username
-    DOCKER_REGISTRY_SERVER_PASSWORD = azurerm_container_registry.acr.admin_password
+    "DOCKER_REGISTRY_SERVER_URL"      = "https://registryfvq3o.azurecr.io"
+    "DOCKER_REGISTRY_SERVER_USERNAME" = azurerm_container_registry.acr.admin_username
+    "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.acr.admin_password
+    "WEBSITES_PORT"                   = "80" # Tells Azure your container is listening on port 80
   }
 }
