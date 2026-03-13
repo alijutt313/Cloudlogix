@@ -1,11 +1,11 @@
-name: "Day 8: Infrastructure Setup"
+name: "Day 8: Full CI/CD Pipeline"
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  terraform-only:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,25 +13,29 @@ jobs:
       - name: HashiCorp - Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0 # Or your preferred version
+          terraform_version: 1.5.0
 
       - name: "Azure Login"
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: "Terraform Init"
-        run: terraform init
+      - name: "Terraform Init & Apply"
+        run: |
+          terraform init
+          terraform apply -auto-approve
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: "Terraform Apply"
-        run: terraform apply -auto-approve
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      - name: "Login to ACR"
+        run: az acr login --name registryfvq3o
+
+      - name: "Build and Push Image"
+        run: |
+          docker build -t registryfvq3o.azurecr.io/my-devops-app:${{ github.run_number }} .
+          docker push registryfvq3o.azurecr.io/my-devops-app:${{ github.run_number }}
+          docker tag registryfvq3o.azurecr.io/my-devops-app:${{ github.run_number }} registryfvq3o.azurecr.io/my-devops-app:latest
+          docker push registryfvq3o.azurecr.io/my-devops-app:latest
