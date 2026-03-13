@@ -27,7 +27,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "rg" {
   name     = "DevOps-Day3-RG"
-  location = "East US"
+  location = "West US"
 }
 
 # PHASE 2: THE MULTI-APP DEPLOYMENT (Scaling)
@@ -87,7 +87,7 @@ output "acr_login_server" {
 resource "azurerm_service_plan" "app_plan" {
   name                = "devops-app-plan"
   resource_group_name = "DevOps-Day3-RG"
-  location            = "East US"
+  location            = "West US"
   os_type             = "Linux"
   sku_name            = "F1" # Free Tier
 }
@@ -96,7 +96,7 @@ resource "azurerm_service_plan" "app_plan" {
 resource "azurerm_linux_web_app" "web_app" {
   name                = "my-devops-site-${random_string.acr_name.result}"
   resource_group_name = "DevOps-Day3-RG"
-  location            = "East US"
+  location            = "West US"
   service_plan_id     = azurerm_service_plan.app_plan.id
 
   site_config {
@@ -112,5 +112,5 @@ resource "azurerm_linux_web_app" "web_app" {
 
   app_settings = {
     "WEBSITES_PORT" = "80"
-  }
+  } 
 }
