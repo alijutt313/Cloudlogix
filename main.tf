@@ -5,6 +5,7 @@ terraform {
     storage_account_name = "ststate1773215025" # Using the ID from your successful Day 2 run
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
+    use_azurecli         = true  # <--- ADD THIS LINE
   }
 
   required_providers {
