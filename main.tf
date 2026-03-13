@@ -58,3 +58,22 @@ resource "azurerm_container_group" "mega_app" {
     }
   }
 }
+
+resource "random_string" "acr_suffix" {
+  length  = 5
+  special = false
+  upper   = false
+}
+
+resource "azurerm_container_registry" "acr" {
+  name                = "registry${random_string.acr_suffix.result}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  sku                 = "Basic"
+  admin_enabled       = true
+}
+
+# Output the login server so we can use it in our pipeline
+output "acr_login_server" {
+  value = azurerm_container_registry.acr.login_server
+}

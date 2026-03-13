@@ -1,27 +1,22 @@
-name: "Azure Automation"
+name: "Day 8: Infrastructure Setup"
 
 on:
   push:
-    branches:
-      - main  # Every time you push to main, this starts
+    branches: [ main ]
 
 jobs:
-  deploy:
+  terraform-only:
     runs-on: ubuntu-latest
     steps:
-      - name: "Clone Code"
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: "Login to Azure"
+      - name: "Azure Login"
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: "Setup Terraform"
-        uses: hashicorp/setup-terraform@v2
-
       - name: "Terraform Init"
         run: terraform init
 
-      - name: "Terraform Destroy"
-        run: terraform destroy -auto-approve
+      - name: "Terraform Apply"
+        run: terraform apply -auto-approve
