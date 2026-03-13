@@ -10,6 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0 # Or your preferred version
+
       - name: "Azure Login"
         uses: azure/login@v1
         with:
