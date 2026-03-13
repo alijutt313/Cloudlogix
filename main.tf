@@ -15,6 +15,12 @@ terraform {
   }
 }
 
+resource "random_string" "acr_name" {
+  length  = 5
+  special = false
+  upper   = false
+}
+
 provider "azurerm" {
   features {}
   resource_provider_registrations = "none"
