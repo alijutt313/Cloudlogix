@@ -25,7 +25,7 @@ provider "azurerm" {
   features {}
 }
 
-#resource "azurerm_resource_group" "rg" {
+resource "azurerm_resource_group" "rg" {
  name     = "DevOps-Day3-RG"
  location = "West US"
 }
