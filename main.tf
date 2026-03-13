@@ -100,16 +100,17 @@ resource "azurerm_linux_web_app" "web_app" {
   service_plan_id     = azurerm_service_plan.app_plan.id
 
   site_config {
+    always_on = false
     application_stack {
       docker_image_name   = "my-devops-app:latest"
       docker_registry_url = "https://registryfvq3o.azurecr.io"
+      # Adding these here handles the secrets more reliably than app_settings
+      docker_registry_username = azurerm_container_registry.acr.admin_username
+      docker_registry_password = azurerm_container_registry.acr.admin_password
     }
   }
 
   app_settings = {
-    "DOCKER_REGISTRY_SERVER_URL"      = "https://registryfvq3o.azurecr.io"
-    "DOCKER_REGISTRY_SERVER_USERNAME" = azurerm_container_registry.acr.admin_username
-    "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.acr.admin_password
-    "WEBSITES_PORT"                   = "80" # Tells Azure your container is listening on port 80
+    "WEBSITES_PORT" = "80"
   }
 }
