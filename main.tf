@@ -108,8 +108,8 @@ resource "azurerm_linux_web_app" "web_app" {
   }
 
   app_settings = {
-    "DOCKER_REGISTRY_SERVER_URL"      = "https://registryfvq3o.azurecr.io"
-    "DOCKER_REGISTRY_SERVER_USERNAME" = azurerm_container_registry.acr.admin_username
-    "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.acr.admin_password
+    DOCKER_REGISTRY_SERVER_URL      = "https://registryfvq3o.azurecr.io"
+    DOCKER_REGISTRY_SERVER_USERNAME = azurerm_container_registry.acr.admin_username
+    DOCKER_REGISTRY_SERVER_PASSWORD = azurerm_container_registry.acr.admin_password
   }
 }
