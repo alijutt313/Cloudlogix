@@ -1,11 +1,11 @@
 terraform {
   # PHASE 1: THE VAULT (Remote State)
-  backend "azurerm" {
-    resource_group_name  = "DevOps-Day3-RG"
-    storage_account_name = "ststate1773215025" # Using the ID from your successful Day 2 run
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-  }
+  # backend "azurerm" {
+  #  resource_group_name  = "DevOps-Day3-RG"
+  #  storage_account_name = "ststate1773215025" # Using the ID from your successful Day 2 run
+  #  container_name       = "tfstate"
+  #  key                  = "terraform.tfstate"
+  # }
 
   required_providers {
     azurerm = {
@@ -25,9 +25,9 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rg" {
-  name     = "DevOps-Day3-RG"
-  location = "West US"
+#resource "azurerm_resource_group" "rg" {
+ name     = "DevOps-Day3-RG"
+ location = "West US"
 }
 
 # PHASE 2: THE MULTI-APP DEPLOYMENT (Scaling)
