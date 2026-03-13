@@ -77,3 +77,33 @@ resource "azurerm_container_registry" "acr" {
 output "acr_login_server" {
   value = azurerm_container_registry.acr.login_server
 }
+
+# 1. The "Server" hardware (Free Tier)
+resource "azurerm_service_plan" "app_plan" {
+  name                = "devops-app-plan"
+  resource_group_name = "DevOps-Day3-RG"
+  location            = "East US"
+  os_type             = "Linux"
+  sku_name            = "F1" # Free Tier
+}
+
+# 2. The "Storefront" (The Web App)
+resource "azurerm_linux_web_app" "web_app" {
+  name                = "my-devops-site-${random_string.acr_name.result}"
+  resource_group_name = "DevOps-Day3-RG"
+  location            = "East US"
+  service_plan_id     = azurerm_service_plan.app_plan.id
+
+  site_config {
+    application_stack {
+      docker_image_name   = "my-devops-app:latest"
+      docker_registry_url = "https://registryfvq3o.azurecr.io"
+    }
+  }
+
+  app_settings = {
+    "DOCKER_REGISTRY_SERVER_URL"      = "https://registryfvq3o.azurecr.io"
+    "DOCKER_REGISTRY_SERVER_USERNAME" = azurerm_container_registry.acr.admin_username
+    "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.acr.admin_password
+  }
+}
