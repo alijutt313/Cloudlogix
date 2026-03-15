@@ -50,7 +50,7 @@ jobs:
       - name: "Azure Web App Deploy"
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "ali-devops-app-final" # Matches the name in main.tf
+          app-name: "ali-devops-app-final"
           images: "${{ env.ACR_NAME }}/my-devops-app:latest"
 
 
