@@ -28,8 +28,9 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve
-          # This captures the new registry name dynamically
+          # Capture both the Registry and the Suffix clearly
           echo "ACR_NAME=$(terraform output -raw acr_login_server)" >> $GITHUB_ENV
+          echo "APP_SUFFIX=$(terraform output -raw suffix)" >> $GITHUB_ENV
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -49,9 +50,10 @@ jobs:
       - name: "Azure Web App Deploy"
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "webapp-${{ env.SUFFIX }}" # We will get this from TF too
+          app-name: "webapp-${{ env.APP_SUFFIX }}" # This will now be 'webapp-xxxxxx'
           images: "${{ env.ACR_NAME }}/my-devops-app:latest"
 
+          
       - name: "Final Sanity Check"
         run: |
           echo "Deployment Complete!"
