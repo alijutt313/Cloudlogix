@@ -78,7 +78,8 @@ output "acr_login_server" {
 }
 
 output "webapp_url" {
-  value = azurerm_linux_web_app.web_app.default_hostname
+  # Notice 'web_app' is now just 'webapp'
+  value = azurerm_linux_web_app.webapp.default_hostname 
 }
 output "suffix" {
   value = random_string.suffix.result
