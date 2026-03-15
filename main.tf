@@ -21,12 +21,11 @@ provider "azurerm" {
   features {}
 }
 
-# 1. THE FOUNDATION: Resource Group
+# 1. Update the Resource Group NAME and LOCATION
 resource "azurerm_resource_group" "rg" {
-  name     = "DevOps-Final-RG"
-  location = "East US 2" # High availability for Free Tier slots
+  name     = "DevOps-Final-Deployment-RG" # Changed name to avoid the "already exists" error
+  location = "East US 2"                 # Switched to a higher-capacity region
 }
-
 # 2. THE IDENTITY: Random suffix for unique naming
 resource "random_string" "suffix" {
   length  = 6
