@@ -1,10 +1,12 @@
 terraform {
   # PHASE 1: THE VAULT (Remote State)
+  # Keep this commented out for the first run! 
+  # Once the Resource Group and Storage are built, you can migrate the state here.
   # backend "azurerm" {
-  #  resource_group_name  = "DevOps-Day3-RG"
-  #  storage_account_name = "ststate1773215025" # Using the ID from your successful Day 2 run
-  #  container_name       = "tfstate"
-  #  key                  = "terraform.tfstate"
+  #   resource_group_name  = "DevOps-Final-RG"
+  #   storage_account_name = "ststatefinal${random_string.suffix.result}" 
+  #   container_name       = "tfstate"
+  #   key                  = "terraform.tfstate"
   # }
 
   required_providers {
@@ -15,102 +17,69 @@ terraform {
   }
 }
 
-resource "random_string" "acr_name" {
-  length  = 5
-  special = false
-  upper   = false
-}
-
 provider "azurerm" {
   features {}
 }
 
+# 1. THE FOUNDATION: Resource Group
 resource "azurerm_resource_group" "rg" {
- name     = "DevOps-Day3-RG"
- location = "West US"
+  name     = "DevOps-Final-RG"
+  location = "Central US" # High availability for Free Tier slots
 }
 
-# PHASE 2: THE MULTI-APP DEPLOYMENT (Scaling)
-resource "azurerm_container_group" "mega_app" {
-  name                = "scaled-app"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  os_type             = "Linux"
-  ip_address_type     = "Public"
-  dns_name_label      = "murtaza-scaled-app"
-
-  # Instance 1
-  container {
-    name   = "app-instance-1"
-    image  = "mcr.microsoft.com/azuredocs/aci-helloworld"
-    cpu    = "0.5"
-    memory = "1.0"
-    ports {
-      port     = 80
-      protocol = "TCP"
-    }
-  }
-
-  # Instance 2 (Scaling)
-  container {
-    name   = "app-instance-2"
-    image  = "mcr.microsoft.com/azuredocs/aci-helloworld"
-    cpu    = "0.5"
-    memory = "1.0"
-    ports {
-      port     = 81
-      protocol = "TCP"
-    }
-  }
-}
-
-resource "random_string" "acr_suffix" {
-  length  = 5
+# 2. THE IDENTITY: Random suffix for unique naming
+resource "random_string" "suffix" {
+  length  = 6
   special = false
   upper   = false
 }
 
+# 3. THE WAREHOUSE: Container Registry
 resource "azurerm_container_registry" "acr" {
-  name                = "registry${random_string.acr_suffix.result}"
+  name                = "registry${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                 = "Basic"
   admin_enabled       = true
 }
 
-# Output the login server so we can use it in our pipeline
-output "acr_login_server" {
-  value = azurerm_container_registry.acr.login_server
-}
-
-# 1. The "Server" hardware (Free Tier)
-resource "azurerm_service_plan" "app_plan" {
-  name                = "devops-app-plan"
-  resource_group_name = "DevOps-Day3-RG"
-  location            = "West US"
+# 4. THE SERVER: App Service Plan (Free Tier)
+resource "azurerm_service_plan" "plan" {
+  name                = "devops-free-plan"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
-  sku_name            = "F1" # Free Tier
+  sku_name            = "F1" # Strictly $0.00/month
 }
 
-# 2. The "Storefront" (The Web App)
+# 5. THE APPLICATION: Linux Web App
 resource "azurerm_linux_web_app" "web_app" {
-  name                = "my-devops-site-${random_string.acr_name.result}"
-  resource_group_name = "DevOps-Day3-RG"
-  location            = "West US"
-  service_plan_id     = azurerm_service_plan.app_plan.id
+  name                = "webapp-${random_string.suffix.result}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  service_plan_id     = azurerm_service_plan.plan.id
 
   site_config {
-    always_on = false
+    always_on = false # Required for F1 Free Tier
     application_stack {
-      docker_image_name   = "my-devops-app:latest"
-      docker_registry_url = "https://registryfvq3o.azurecr.io"
-      # Adding these here handles the secrets more reliably than app_settings
+      docker_image_name   = "nginx:latest" # Placeholder until CI/CD push
+      docker_registry_url = "https://${azurerm_container_registry.acr.login_server}"
+      
+      # Correctly handling secrets natively within the stack block
       docker_registry_username = azurerm_container_registry.acr.admin_username
       docker_registry_password = azurerm_container_registry.acr.admin_password
     }
   }
+}
 
-  app_settings = {
-    "WEBSITES_PORT" = "80"
-  } 
+# OUTPUTS: Useful for your CI/CD pipeline
+output "acr_login_server" {
+  value = azurerm_container_registry.acr.login_server
+}
+
+output "webapp_url" {
+  value = azurerm_linux_web_app.web_app.default_hostname
+}
+output "suffix" {
+  value = random_string.suffix.result
 }

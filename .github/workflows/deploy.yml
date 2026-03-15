@@ -1,18 +1,21 @@
-name: "Day 8: Full CI/CD Pipeline"
+name: "Day 9-10: Unified Infrastructure & Deployment"
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  terraform-and-deploy:
     runs-on: ubuntu-latest
+    # We need these permissions to read the OIDC tokens if you're using them, 
+    # but for your current secret setup, standard permissions are fine.
     steps:
       - uses: actions/checkout@v3
 
       - name: HashiCorp - Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
+          terraform_wrapper: false # Critical for capturing outputs easily
           terraform_version: 1.5.0
 
       - name: "Azure Login"
@@ -21,9 +24,12 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: "Terraform Init & Apply"
+        id: tf
         run: |
           terraform init
           terraform apply -auto-approve
+          # This captures the new registry name dynamically
+          echo "ACR_NAME=$(terraform output -raw acr_login_server)" >> $GITHUB_ENV
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -31,11 +37,22 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       - name: "Login to ACR"
-        run: az acr login --name registryfvq3o
+        # Uses the dynamic name from the step above
+        run: az acr login --name ${{ env.ACR_NAME }}
 
       - name: "Build and Push Image"
         run: |
-          docker build -t registryfvq3o.azurecr.io/my-devops-app:${{ github.run_number }} .
-          docker push registryfvq3o.azurecr.io/my-devops-app:${{ github.run_number }}
-          docker tag registryfvq3o.azurecr.io/my-devops-app:${{ github.run_number }} registryfvq3o.azurecr.io/my-devops-app:latest
-          docker push registryfvq3o.azurecr.io/my-devops-app:latest
+          docker build -t ${{ env.ACR_NAME }}/my-devops-app:${{ github.run_number }} .
+          docker push ${{ env.ACR_NAME }}/my-devops-app:${{ github.run_number }}
+          docker tag ${{ env.ACR_NAME }}/my-devops-app:${{ github.run_number }} ${{ env.ACR_NAME }}/my-devops-app:latest
+          docker push ${{ env.ACR_NAME }}/my-devops-app:latest
+      - name: "Azure Web App Deploy"
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "webapp-${{ env.SUFFIX }}" # We will get this from TF too
+          images: "${{ env.ACR_NAME }}/my-devops-app:latest"
+
+      - name: "Final Sanity Check"
+        run: |
+          echo "Deployment Complete!"
+          echo "Your app is live at: https://$(terraform output -raw webapp_url)"
