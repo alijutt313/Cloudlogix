@@ -24,7 +24,7 @@ provider "azurerm" {
 # 1. THE FOUNDATION: Resource Group
 resource "azurerm_resource_group" "rg" {
   name     = "DevOps-Final-RG"
-  location = "Central US" # High availability for Free Tier slots
+  location = "East US 2" # High availability for Free Tier slots
 }
 
 # 2. THE IDENTITY: Random suffix for unique naming
