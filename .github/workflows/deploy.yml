@@ -50,10 +50,10 @@ jobs:
       - name: "Azure Web App Deploy"
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "webapp-${{ env.APP_SUFFIX }}" # This will now be 'webapp-xxxxxx'
+          app-name: "ali-devops-app-final" # Matches the name in main.tf
           images: "${{ env.ACR_NAME }}/my-devops-app:latest"
 
-          
+
       - name: "Final Sanity Check"
         run: |
           echo "Deployment Complete!"

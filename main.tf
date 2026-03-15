@@ -43,20 +43,21 @@ resource "azurerm_container_registry" "acr" {
 }
 
 # 4. THE SERVER: App Service Plan (Free Tier)
+# main.tf
 resource "azurerm_service_plan" "plan" {
-  name                = "devops-free-plan"
+  name                = "ali-final-plan" # Hardcoded name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   os_type             = "Linux"
-  sku_name            = "F1" # Strictly $0.00/month
+  sku_name            = "F1"
 }
 
-# 5. THE APPLICATION: Linux Web App
-resource "azurerm_linux_web_app" "web_app" {
-  name                = "webapp-${random_string.suffix.result}"
+resource "azurerm_linux_web_app" "webapp" {
+  name                = "ali-devops-app-final" # Hardcoded name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   service_plan_id     = azurerm_service_plan.plan.id
+
 
   site_config {
     always_on = false # Required for F1 Free Tier
