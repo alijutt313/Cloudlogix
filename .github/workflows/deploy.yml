@@ -1,4 +1,4 @@
-name: "Day 9-10: Unified Infrastructure & Deployment"
+name: "Project 1"
 
 on:
   push:
@@ -28,33 +28,8 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve
-          # Capture both the Registry and the Suffix clearly
-          echo "ACR_NAME=$(terraform output -raw acr_login_server)" >> $GITHUB_ENV
-          echo "APP_SUFFIX=$(terraform output -raw suffix)" >> $GITHUB_ENV
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-      - name: "Login to ACR"
-        # Uses the dynamic name from the step above
-        run: az acr login --name ${{ env.ACR_NAME }}
-
-      - name: "Build and Push Image"
-        run: |
-          docker build -t ${{ env.ACR_NAME }}/my-devops-app:${{ github.run_number }} .
-          docker push ${{ env.ACR_NAME }}/my-devops-app:${{ github.run_number }}
-          docker tag ${{ env.ACR_NAME }}/my-devops-app:${{ github.run_number }} ${{ env.ACR_NAME }}/my-devops-app:latest
-          docker push ${{ env.ACR_NAME }}/my-devops-app:latest
-      - name: "Azure Web App Deploy"
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: "ali-devops-app-final"
-          images: "${{ env.ACR_NAME }}/my-devops-app:latest"
-
-
-      - name: "Final Sanity Check"
-        run: |
-          echo "Deployment Complete!"
-          echo "Your app is live at: https://$(terraform output -raw webapp_url)"
