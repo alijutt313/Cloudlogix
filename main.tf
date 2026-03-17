@@ -4,7 +4,7 @@ provider "azurerm" {
 
 # 1. Resource Group
 resource "azurerm_resource_group" "rg" {
-  name     = "Project_1_2"
+  name     = "Project_1_3"
   location = "France Central" 
 }
 
@@ -21,6 +21,11 @@ resource "azurerm_storage_account" "asa" {
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
+
+  static_website {
+    index_document = "index.html"
+    error_404_document = "404.html" # Optional, but good practice
+  }
 
 }
 
