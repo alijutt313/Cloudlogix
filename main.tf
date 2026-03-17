@@ -38,7 +38,7 @@ resource "azurerm_storage_container" "asc" {
 resource "azurerm_storage_blob" "asb" {
   name                   = "index.html"
   storage_account_name   = azurerm_storage_account.asa.name
-  storage_container_name = azurerm_storage_container.asc.name
+  storage_container_name = "$web"
   type                   = "Block"
   content_type           = "text/html"
   source                 = "index.html"
