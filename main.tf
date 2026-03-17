@@ -4,7 +4,7 @@ provider "azurerm" {
 
 # 1. Resource Group
 resource "azurerm_resource_group" "rg" {
-  name     = "Project_1"
+  name     = "Project_1_2"
   location = "France Central" 
 }
 
@@ -24,7 +24,7 @@ resource "azurerm_storage_account" "asa" {
 
 }
 
-resource "azurerm_storage_container" "asc {
+resource "azurerm_storage_container" "asc" {
   name                  = "project1storagecontainer${random_string.suffix.result}"
   storage_account_id    = azurerm_storage_account.asa.id
   container_access_type = "private"
