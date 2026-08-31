@@ -1,14 +1,17 @@
+# Python
 venv/
-__pychache__/
+__pycache__/
 *.pyc
-.pytest_chache/
+.pytest_cache/
 
+# Terraform
 .terraform/
 *.tfstate
 *.tfstate.backup
 *.tfvars
 .terraform.lock.hcl
 
+# Environment & IDE
 .env
 .vscode/
 .idea/
