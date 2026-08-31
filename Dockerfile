@@ -1,12 +1,11 @@
-# Step 1: Use a tiny Linux version with Python already installed
-FROM python:3.9-slim
+FROM python:3.12-slim
 
-# Step 2: Set the folder inside the container where we will work
 WORKDIR /app
 
-# Step 3: Copy your HTML file into the container
-COPY index.html .
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Step 4: Command to start a simple web server on port 8080
-CMD ["python", "-m", "http.server", "8080"]
+COPY . .
 
+EXPOSE 5000
+CMD ["python", "app.py"]

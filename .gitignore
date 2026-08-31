@@ -1,9 +1,14 @@
-# Ignore the Terraform tool folder
+venv/
+__pychache__/
+*.pyc
+.pytest_chache/
+
 .terraform/
-
-# Ignore local state files (since we use Azure for this now)
 *.tfstate
-*.tfstate.*
-
-# Ignore sensitive variables
+*.tfstate.backup
 *.tfvars
+.terraform.lock.hcl
+
+.env
+.vscode/
+.idea/
