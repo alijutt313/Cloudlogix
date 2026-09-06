@@ -1,35 +1,54 @@
-name: "Project 1"
+name: Build, Test, and Deploy to Azure
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
-  terraform-and-deploy:
+  test:
+    name: Run Pytest Suite
     runs-on: ubuntu-latest
-    # We need these permissions to read the OIDC tokens if you're using them, 
-    # but for your current secret setup, standard permissions are fine.
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: HashiCorp - Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          terraform_wrapper: false # Critical for capturing outputs easily
-          terraform_version: 1.5.0
+          python-version: "3.12"
 
-      - name: "Azure Login"
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Pytest
+        run: python -m pytest
+
+  terraform:
+    name: Terraform Provisioning
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: "Terraform Init & Apply"
-        id: tf
-        run: |
-          terraform init
-          terraform apply -auto-approve
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
         env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
