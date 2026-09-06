@@ -52,3 +52,7 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: ./terraform
+
+      - name: Output Endpoint
+        run: terraform output static_website_url
+        working-directory: ./terraform
