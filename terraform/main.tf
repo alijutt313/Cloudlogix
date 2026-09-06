@@ -28,13 +28,17 @@ resource "azurerm_storage_account_static_website" "website" {
   index_document     = "index.html"
 }
 
+data "azurerm_storage_container" "web_container" {
+  name                 = "$web"
+  storage_account_name = azurerm_storage_account.asa.name
+  depends_on           = [azurerm_storage_account_static_website.website]
+}
+
 resource "azurerm_storage_blob" "asb" {
   name                   = "index.html"
-  storage_container_name = "$web"
-  storage_account_name   = azurerm_storage_account.asa.name
+  storage_container_id   = data.azurerm_storage_container.web_container.id
   type                   = "Block"
   source_content         = "<h1>Cloudlogix API Live</h1>"
   content_type           = "text/html"
-  depends_on             = [azurerm_storage_account_static_website.website]
 }
 
