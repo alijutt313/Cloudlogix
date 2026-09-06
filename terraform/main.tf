@@ -9,14 +9,14 @@ resource "azurerm_resource_group" "rg" {
 }
 
 # 2. Random Suffix for unique naming
-resource "random_string" "suffix" {
-  length  = 4
+resource "random_string" "random" {
+  length  = 6
   special = false
   upper   = false
 }
 
 resource "azurerm_storage_account" "asa" {
-  name                     = "stcloudlogix${random_string.random.result}" # Ensure valid storage account name
+  name                     = "stcloudlogix${random_string.random.result}"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -29,7 +29,7 @@ resource "azurerm_storage_account" "asa" {
 
 resource "azurerm_storage_container" "sc" {
   name                  = "$web"
-  storage_account_name  = azurerm_storage_account.asa.name
+  storage_account_id    = azurerm_storage_account.asa.id
   container_access_type = "private"
 }
 
