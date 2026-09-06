@@ -16,6 +16,11 @@ provider "azurerm" {
   features {}
 }
 
+import {
+  to = azurerm_resource_group.rg
+  id = "/subscriptions/452040b1-48ac-463b-985f-f4dbd5e729a6/resourceGroups/rg-cloudlogix-dev"
+}
+
 resource "azurerm_resource_group" "rg" {
   name     = "rg-cloudlogix-dev"
   location = "East US"
@@ -52,4 +57,9 @@ resource "azurerm_storage_blob" "asb" {
   type                   = "Block"
   source_content         = "<h1>Cloudlogix API Live</h1>"
   content_type           = "text/html"
+}
+
+output "static_website_url" {
+  value       = azurerm_storage_account.asa.primary_web_endpoint
+  description = "The public endpoint for the static website."
 }
