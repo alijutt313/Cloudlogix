@@ -1,14 +1,26 @@
+terraform {
+  required_version = ">= 1.5.0"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
+}
+
 provider "azurerm" {
   features {}
 }
 
-# 1. Resource Group
 resource "azurerm_resource_group" "rg" {
-  name     = "Project_1_3"
-  location = "France Central" 
+  name     = "rg-cloudlogix-dev"
+  location = "East US"
 }
 
-# 2. Random Suffix for unique naming
 resource "random_string" "random" {
   length  = 6
   special = false
@@ -29,9 +41,9 @@ resource "azurerm_storage_account_static_website" "website" {
 }
 
 data "azurerm_storage_container" "web_container" {
-  name                 = "$web"
-  storage_account_name = azurerm_storage_account.asa.name
-  depends_on           = [azurerm_storage_account_static_website.website]
+  name               = "$web"
+  storage_account_id = azurerm_storage_account.asa.id
+  depends_on         = [azurerm_storage_account_static_website.website]
 }
 
 resource "azurerm_storage_blob" "asb" {
@@ -41,4 +53,3 @@ resource "azurerm_storage_blob" "asb" {
   source_content         = "<h1>Cloudlogix API Live</h1>"
   content_type           = "text/html"
 }
-
