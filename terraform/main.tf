@@ -16,7 +16,7 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_storage_account" "asa" {
-  name                     = "project1storageacc${random_string.suffix.result}"
+  name                     = "stcloudlogix${random_string.random.result}" # Ensure valid storage account name
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -24,24 +24,21 @@ resource "azurerm_storage_account" "asa" {
 
   static_website {
     index_document = "index.html"
-    error_404_document = "404.html" # Optional, but good practice
   }
-
 }
 
-resource "azurerm_storage_container" "asc" {
-  name                  = "project1storagecontainer${random_string.suffix.result}"
-  storage_account_id    = azurerm_storage_account.asa.id
+resource "azurerm_storage_container" "sc" {
+  name                  = "$web"
+  storage_account_name  = azurerm_storage_account.asa.name
   container_access_type = "private"
 }
 
 resource "azurerm_storage_blob" "asb" {
   name                   = "index.html"
-  storage_account_name   = azurerm_storage_account.asa.name
-  storage_container_name = "$web"
+  storage_container_id   = azurerm_storage_container.sc.id
   type                   = "Block"
+  source_content         = "<h1>Cloudlogix API Live</h1>"
   content_type           = "text/html"
-  source                 = "index.html"
 }
 
 
