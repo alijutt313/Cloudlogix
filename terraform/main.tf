@@ -10,6 +10,11 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+    import {
+    to = azurerm_resource_group.rg
+    id = "/subscriptions/452040b1-48ac-463b-985f-f4dbd5e729a6/resourceGroups/rg-cloudlogix-dev"
+    }
 }
 
 provider "azurerm" {
