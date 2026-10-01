@@ -40,46 +40,40 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
       - name: Terraform Init
         working-directory: ./terraform
         env:
-          AZURE_CREDS: ${{ secrets.AZURE_CREDENTIALS }}
+          ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+          ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+          ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
           ARM_USE_CLI: "false"
         run: |
-          CLIENT_ID=\((echo "\)AZURE_CREDS" | jq -r .clientId)
-          CLIENT_SECRET=\((echo "\)AZURE_CREDS" | jq -r .clientSecret)
-          SUBSCRIPTION_ID=\((echo "\)AZURE_CREDS" | jq -r .subscriptionId)
-          TENANT_ID=\((echo "\)AZURE_CREDS" | jq -r .tenantId)
-
           terraform init \
-            -backend-config="client_id=$CLIENT_ID" \
-            -backend-config="client_secret=$CLIENT_SECRET" \
-            -backend-config="subscription_id=$SUBSCRIPTION_ID" \
-            -backend-config="tenant_id=$TENANT_ID"
+            -backend-config="client_id=$ARM_CLIENT_ID" \
+            -backend-config="client_secret=$ARM_CLIENT_SECRET" \
+            -backend-config="subscription_id=$ARM_SUBSCRIPTION_ID" \
+            -backend-config="tenant_id=$ARM_TENANT_ID"
 
       - name: Terraform Apply
         working-directory: ./terraform
         env:
-          AZURE_CREDS: ${{ secrets.AZURE_CREDENTIALS }}
+          ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+          ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+          ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
           ARM_USE_CLI: "false"
-        run: |
-          export ARM_CLIENT_ID=\((echo "\)AZURE_CREDS" | jq -r .clientId)
-          export ARM_CLIENT_SECRET=\((echo "\)AZURE_CREDS" | jq -r .clientSecret)
-          export ARM_SUBSCRIPTION_ID=\((echo "\)AZURE_CREDS" | jq -r .subscriptionId)
-          export ARM_TENANT_ID=\((echo "\)AZURE_CREDS" | jq -r .tenantId)
-
-          terraform apply -auto-approve
+        run: terraform apply -auto-approve
 
       - name: Output Endpoint
         working-directory: ./terraform
         env:
-          AZURE_CREDS: ${{ secrets.AZURE_CREDENTIALS }}
+          ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+          ARM_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+          ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
           ARM_USE_CLI: "false"
-        run: |
-          export ARM_CLIENT_ID=\((echo "\)AZURE_CREDS" | jq -r .clientId)
-          export ARM_CLIENT_SECRET=\((echo "\)AZURE_CREDS" | jq -r .clientSecret)
-          export ARM_SUBSCRIPTION_ID=\((echo "\)AZURE_CREDS" | jq -r .subscriptionId)
-          export ARM_TENANT_ID=\((echo "\)AZURE_CREDS" | jq -r .tenantId)
-
-          terraform output static_website_url
+        run: terraform output static_website_url
