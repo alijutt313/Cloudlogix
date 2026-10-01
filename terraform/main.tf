@@ -11,16 +11,18 @@ terraform {
     }
   }
 
+  backend "azurerm" {
+    resource_group_name  = "rg-cloudlogix-dev"
+    storage_account_name = "stcloudlogix3c815t"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
   features {}
 }
 
-import {
-    to = azurerm_resource_group.rg
-    id = "/subscriptions/452040b1-48ac-463b-985f-f4dbd5e729a6/resourceGroups/rg-cloudlogix-dev"
-  }
 resource "azurerm_resource_group" "rg" {
   name     = "rg-cloudlogix-dev"
   location = "East US"
